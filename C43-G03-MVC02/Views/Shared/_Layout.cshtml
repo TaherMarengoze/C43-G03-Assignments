@@ -1,0 +1,40 @@
+﻿
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/css/bootstrap.min.css" />
+
+</head>
+<body>
+
+    <header>
+
+        <div class="text-center">
+
+            <a asp-controller="Home" asp-action="Index" class="btn btn-primary mx-1">Home</a>
+            <a asp-controller="Home" asp-action="Products" class="btn btn-success mx-1">Products</a>
+            <a asp-controller="Home" asp-action="Orders" class="btn btn-info mx-1">Orders</a>
+            <a asp-controller="Home" asp-action="ContactUs" class="btn btn-warning mx-1">Contact Us</a>
+
+            @* Html Helper *@
+            @* @Html.ActionLink("Home", "ContactUs", "Contact Us", null, new { @class = "btn btn-secondary mx-1" }) *@
+
+        </div>
+
+
+    </header>
+
+    <div>
+        @RenderBody()
+    </div>
+
+    <footer class="fixed-bottom text-center">
+        Copyright &copy; To its righfull owner @DateTime.Now.Year
+    </footer>
+
+</body>
+</html>
