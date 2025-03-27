@@ -37,5 +37,57 @@ namespace Company.Web.Controllers
             _departmentService.Add(department);
             return RedirectToAction(nameof(Index));
         }
+
+        public IActionResult Details(int? id)
+        {
+            var dept = _departmentService.GetById(id);
+
+            if (dept is null)
+                return RedirectToNotFound();
+
+            return View(dept);
+        }
+
+        [HttpGet]
+        public IActionResult Update(int? id)
+        {
+            var department = _departmentService.GetById(id);
+
+            if (department is null)
+                return RedirectToNotFound();
+
+            return View(department);
+        }
+
+        [HttpPost]
+        public IActionResult Update(int? id, Department department)
+        {
+            if (department.Id != id)
+                return RedirectToNotFound();
+
+            _departmentService.Update(department);
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        public IActionResult Delete(int id)
+        {
+            var dept = _departmentService.GetById(id);
+
+            if (dept is null)
+                return RedirectToNotFound();
+
+            _departmentService.Delete(dept);
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        private RedirectToActionResult RedirectToNotFound()
+        {
+            return RedirectToAction(
+                nameof(HomeController.NotFoundPage),
+                nameof(HomeController).Replace("Controller", "")
+            );
+        }
     }
 }

@@ -4,7 +4,7 @@ namespace Company.Service.Interfaces;
 
 public interface IDepartmentService
 {
-    Department? GetById(int id);
+    Department? GetById(int? id);
 
     IEnumerable<Department> GetAll();
 

@@ -21,8 +21,10 @@ public class Program
             options.UseSqlServer(builder.Configuration.GetConnectionString("MainConn"));
         });
 
-        builder.Services.AddScoped<IDepartmentRepository, DepartmentRepository>();
+        //builder.Services.AddScoped<IDepartmentRepository, DepartmentRepository>();
+        builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
         builder.Services.AddScoped<IDepartmentService, DepartmentService>();
+        builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 
         var app = builder.Build();
 

@@ -13,10 +13,11 @@ public class EmployeeRepository : BaseRepository<Employee>, IEmployeeRepository
         _context = context;
     }
 
-    public Employee? GetByName(string name)
+    public IEnumerable<Employee> GetByName(string name)
     {
-        return _context.Employees.FirstOrDefault(x =>
-            x.Name.Equals(name, StringComparison.CurrentCultureIgnoreCase));
+        return _context.Employees.Where(e =>
+            e.Name.Trim().Contains(name.Trim(), StringComparison.CurrentCultureIgnoreCase))
+            .ToList();
     }
 
     public IEnumerable<Employee> GetByAddress(string address)

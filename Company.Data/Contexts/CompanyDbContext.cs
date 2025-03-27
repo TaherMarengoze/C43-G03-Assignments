@@ -31,6 +31,9 @@ public class CompanyDbContext : DbContext
             .Property(x => x.Id)
             .UseIdentityColumn(10, 10);
 
+        //modelBuilder.Entity<ModelMetadata>()
+        //    .HasQueryFilter(e => !e.IsDeleted);
+
         base.OnModelCreating(modelBuilder);
     }
 

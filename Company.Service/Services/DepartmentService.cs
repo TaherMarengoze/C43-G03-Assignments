@@ -6,11 +6,11 @@ namespace Company.Service.Services;
 
 public class DepartmentService : IDepartmentService
 {
-    private readonly IDepartmentRepository repo;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public DepartmentService(IDepartmentRepository departmentRepository)
+    public DepartmentService(IUnitOfWork unitOfWork)
     {
-        repo = departmentRepository;
+        _unitOfWork = unitOfWork;
     }
 
     public void Add(Department entity)
@@ -21,27 +21,42 @@ public class DepartmentService : IDepartmentService
             Name = entity.Name,
         };
 
-        repo.Add(mappedDepartment);
+        _unitOfWork.DepartmentRepository.Add(mappedDepartment);
+        _unitOfWork.Commit();
     }
 
     public void Delete(Department entity)
     {
-        throw new NotImplementedException();
+        _unitOfWork.DepartmentRepository.Delete(entity);
+        _unitOfWork.Commit();
     }
 
     public IEnumerable<Department> GetAll()
     {
-        var departments = repo.GetAll();
+        var departments = _unitOfWork.DepartmentRepository.GetAll();
         return departments;
     }
 
-    public Department? GetById(int id)
+    public Department? GetById(int? id)
     {
-        throw new NotImplementedException();
+        if (id is null)
+        {
+            return null;
+        }
+
+        Department? department = _unitOfWork.DepartmentRepository.GetById(id.Value);
+
+        if (department is null)
+        {
+            return null;
+        }
+
+        return department;
     }
 
     public void Update(Department entity)
     {
-        throw new NotImplementedException();
+        _unitOfWork.DepartmentRepository.Update(entity);
+        _unitOfWork.Commit();
     }
 }
