@@ -1,7 +1,10 @@
 using Company.Data.Contexts;
 using Company.Repo.Interfaces;
 using Company.Repo.Repositories;
-using Company.Service.Interfaces;
+using Company.Service.Interfaces.Department;
+using Company.Service.Interfaces.Employee;
+using Company.Service.Mapping.Department;
+using Company.Service.Mapping.Employee;
 using Company.Service.Services;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,6 +28,12 @@ public class Program
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
         builder.Services.AddScoped<IDepartmentService, DepartmentService>();
         builder.Services.AddScoped<IEmployeeService, EmployeeService>();
+
+        builder.Services.AddAutoMapper(
+            c => c.AddProfile(new EmployeeProfile()) //method 1
+            //System.Reflection.Assembly.GetAssembly(typeof(EmployeeProfile)) //method 2
+        );
+        builder.Services.AddAutoMapper(c => c.AddProfile(new DepartmentProfile()));
 
         var app = builder.Build();
 

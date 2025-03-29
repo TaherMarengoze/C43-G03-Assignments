@@ -1,43 +1,45 @@
-﻿using Company.Data.Models;
+﻿using AutoMapper;
+using Company.Data.Models;
 using Company.Repo.Interfaces;
-using Company.Service.Interfaces;
+using Company.Service.Interfaces.Department;
+using Company.Service.Interfaces.Department.Dto;
 
 namespace Company.Service.Services;
 
 public class DepartmentService : IDepartmentService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IMapper _mapper;
 
-    public DepartmentService(IUnitOfWork unitOfWork)
+    public DepartmentService(IUnitOfWork unitOfWork,IMapper mapper)
     {
         _unitOfWork = unitOfWork;
+        _mapper = mapper;
     }
 
-    public void Add(Department entity)
+    public void Add(DepartmentDto departmentDto)
     {
-        var mappedDepartment = new Department
-        {
-            Code = entity.Code,
-            Name = entity.Name,
-        };
+        var mappedDepartment = _mapper.Map<Department>(departmentDto);
 
         _unitOfWork.DepartmentRepository.Add(mappedDepartment);
         _unitOfWork.Commit();
     }
 
-    public void Delete(Department entity)
+    public void Delete(DepartmentDto departmentDto)
     {
-        _unitOfWork.DepartmentRepository.Delete(entity);
+        var mappedDepartment = _mapper.Map<Department>(departmentDto);
+        _unitOfWork.DepartmentRepository.Delete(mappedDepartment);
         _unitOfWork.Commit();
     }
 
-    public IEnumerable<Department> GetAll()
+    public IEnumerable<DepartmentDto> GetAll()
     {
         var departments = _unitOfWork.DepartmentRepository.GetAll();
-        return departments;
+        var mappedDepartments = _mapper.Map<IEnumerable<DepartmentDto>>(departments);
+        return mappedDepartments;
     }
 
-    public Department? GetById(int? id)
+    public DepartmentDto? GetById(int? id)
     {
         if (id is null)
         {
@@ -51,12 +53,12 @@ public class DepartmentService : IDepartmentService
             return null;
         }
 
-        return department;
+        return _mapper.Map<DepartmentDto?>(department);
     }
 
-    public void Update(Department entity)
+    public void Update(DepartmentDto entity)
     {
-        _unitOfWork.DepartmentRepository.Update(entity);
-        _unitOfWork.Commit();
+        //_unitOfWork.DepartmentRepository.Update(entity);
+        //_unitOfWork.Commit();
     }
 }

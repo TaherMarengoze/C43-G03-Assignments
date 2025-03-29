@@ -15,9 +15,13 @@ public class EmployeeRepository : BaseRepository<Employee>, IEmployeeRepository
 
     public IEnumerable<Employee> GetByName(string name)
     {
-        return _context.Employees.Where(e =>
-            e.Name.Trim().Contains(name.Trim(), StringComparison.CurrentCultureIgnoreCase))
-            .ToList();
+        const StringComparison ignoreCase = StringComparison.CurrentCultureIgnoreCase;
+
+        return _context.Employees.AsEnumerable().Where(e =>
+            e.Name.Trim().Contains(name.Trim(), ignoreCase)
+            || (e.Email?.Trim().Contains(name.Trim(), ignoreCase) ?? true)
+            || (e.Phone?.Trim().Contains(name.Trim(), ignoreCase) ?? true)
+        ).ToList();
     }
 
     public IEnumerable<Employee> GetByAddress(string address)

@@ -1,5 +1,6 @@
 ﻿using Company.Data.Models;
-using Company.Service.Interfaces;
+using Company.Service.Interfaces.Department;
+using Company.Service.Interfaces.Department.Dto;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Company.Web.Controllers
@@ -27,14 +28,14 @@ namespace Company.Web.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(Department department)
+        public IActionResult Create(DepartmentDto departmentDto)
         {
             if (!ModelState.IsValid)
             {
                 return View();
             }
 
-            _departmentService.Add(department);
+            _departmentService.Add(departmentDto);
             return RedirectToAction(nameof(Index));
         }
 
@@ -59,16 +60,16 @@ namespace Company.Web.Controllers
             return View(department);
         }
 
-        [HttpPost]
-        public IActionResult Update(int? id, Department department)
-        {
-            if (department.Id != id)
-                return RedirectToNotFound();
+        //[HttpPost]
+        //public IActionResult Update(int? id, Department department)
+        //{
+        //    if (department.Id != id)
+        //        return RedirectToNotFound();
 
-            _departmentService.Update(department);
+        //    _departmentService.Update(department);
 
-            return RedirectToAction(nameof(Index));
-        }
+        //    return RedirectToAction(nameof(Index));
+        //}
 
         public IActionResult Delete(int id)
         {

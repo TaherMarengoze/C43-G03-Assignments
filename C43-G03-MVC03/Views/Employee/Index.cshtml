@@ -1,7 +1,8 @@
-﻿@model IEnumerable<Employee>
+﻿@model IEnumerable<EmployeeDto>
 
 @{
     ViewData["Title"] = "Index";
+    const string imagesRoot = @"/Files/Images/";
 }
 
 <div class="text-end">
@@ -21,6 +22,7 @@
 
         <thead>
             <tr>
+                <th>Image</th>
                 <th>@Html.DisplayNameFor(m => m.Name)</th>
                 <th>@Html.DisplayNameFor(m => m.Age)</th>
                 <th>@Html.DisplayNameFor(m => m.Address)</th>
@@ -36,6 +38,13 @@
             @foreach (var employee in Model)
             {
                 <tr>
+                    <td>
+                        @{
+                            var imgUrl = imagesRoot + employee.ImageUrl;
+                        }
+                        <img src="@imgUrl" alt="Employee Profile" width="48" />
+                    </td>
+
                     <td>@employee.Name</td>
                     <td>@employee.Age</td>
                     <td>@employee.Address</td>
