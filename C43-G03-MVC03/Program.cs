@@ -1,4 +1,5 @@
 using Company.Data.Contexts;
+using Company.Data.Models;
 using Company.Repo.Interfaces;
 using Company.Repo.Repositories;
 using Company.Service.Interfaces.Department;
@@ -6,6 +7,7 @@ using Company.Service.Interfaces.Employee;
 using Company.Service.Mapping.Department;
 using Company.Service.Mapping.Employee;
 using Company.Service.Services;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Company.Web;
@@ -35,6 +37,36 @@ public class Program
         );
         builder.Services.AddAutoMapper(c => c.AddProfile(new DepartmentProfile()));
 
+        builder.Services.AddIdentity<ApplicationUser, IdentityRole>(config =>
+        {
+            config.Password.RequiredUniqueChars = 2;
+            config.Password.RequireDigit = true;
+            config.Password.RequireLowercase = true;
+            config.Password.RequireUppercase = true;
+            config.Password.RequireNonAlphanumeric = true;
+
+            config.User.RequireUniqueEmail = true;
+
+            config.Lockout.AllowedForNewUsers = true;
+            config.Lockout.MaxFailedAccessAttempts = 3;
+            config.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromHours(1);
+        })
+            .AddEntityFrameworkStores<CompanyDbContext>()
+            .AddDefaultTokenProviders();
+
+        builder.Services.ConfigureApplicationCookie(options =>
+        {
+            options.Cookie.HttpOnly = true;
+            options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
+            options.SlidingExpiration = true;
+            options.LoginPath = "/Account/Login";
+            options.LogoutPath = "/Account/Logout";
+            options.AccessDeniedPath = "/Account/AccessDenied";
+            options.Cookie.Name = "TestCookies";
+            options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+            options.Cookie.SameSite = SameSiteMode.Strict;
+        });
+
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
@@ -50,11 +82,12 @@ public class Program
 
         app.UseRouting();
 
+        app.UseAuthentication();
         app.UseAuthorization();
 
         app.MapControllerRoute(
             name: "default",
-            pattern: "{controller=Home}/{action=Index}/{id?}");
+            pattern: "{controller=Account}/{action=SignUp}");
 
         app.Run();
     }
