@@ -2,40 +2,39 @@
 using Services.Abstraction;
 using Shared.Dto.Product;
 
-namespace Presentation.Controllers
+namespace Presentation.Controllers;
+
+public class ProductController(IServiceManager serviceManager) : ApiController
 {
-    public class ProductController(IServiceManager serviceManager) : ControllerBase
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<ProductResultDto>>> GetAllProducts()
     {
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<ProductResultDto>>> GetAllProducts()
-        {
-            var products = await serviceManager.ProductService.GetAllProductsAsync();
+        var products = await serviceManager.ProductService.GetAllProductsAsync();
 
-            return Ok(products);
-        }
+        return Ok(products);
+    }
 
-        [HttpGet]
-        public async Task<ActionResult<ProductResultDto>> GetProduct(int id)
-        {
-            var product = await serviceManager.ProductService.GetProductByIdAsync(id);
+    [HttpGet]
+    public async Task<ActionResult<ProductResultDto>> GetProduct(int id)
+    {
+        var product = await serviceManager.ProductService.GetProductByIdAsync(id);
 
-            return Ok(product);
-        }
+        return Ok(product);
+    }
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<BrandResultDto>>> GetAllBrands()
-        {
-            var brands = await serviceManager.ProductService.GetAllBrandsAsync();
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<BrandResultDto>>> GetAllBrands()
+    {
+        var brands = await serviceManager.ProductService.GetAllBrandsAsync();
 
-            return Ok(brands);
-        }
+        return Ok(brands);
+    }
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<TypeResultDto>>> GetAllTypes()
-        {
-            var types = await serviceManager.ProductService.GetAllTypesAsync();
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<TypeResultDto>>> GetAllTypes()
+    {
+        var types = await serviceManager.ProductService.GetAllTypesAsync();
 
-            return Ok(types);
-        }
+        return Ok(types);
     }
 }
