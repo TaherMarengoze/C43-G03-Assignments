@@ -5,6 +5,7 @@ using Persistence;
 using Persistence.Data;
 using Services;
 using Services.Abstraction;
+using Services.MappingProfiles;
 
 namespace Store.Api;
 
@@ -26,7 +27,7 @@ public class Program
         builder.Services.AddScoped<IDbInitializer, DbInitializer>();
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
         builder.Services.AddScoped<IServiceManager, ServiceManager>();
-        builder.Services.AddAutoMapper(typeof(AssemblyReference).Assembly);
+        builder.Services.AddAutoMapper(m => m.AddProfile(new ProductProfile()));
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
