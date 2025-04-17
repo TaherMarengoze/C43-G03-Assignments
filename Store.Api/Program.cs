@@ -1,7 +1,10 @@
+using System.Reflection.Metadata;
 using Domain.Contracts;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 using Persistence.Data;
+using Services;
+using Services.Abstraction;
 
 namespace Store.Api;
 
@@ -22,6 +25,8 @@ public class Program
 
         builder.Services.AddScoped<IDbInitializer, DbInitializer>();
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+        builder.Services.AddScoped<IServiceManager, ServiceManager>();
+        builder.Services.AddAutoMapper(typeof(AssemblyReference).Assembly);
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
