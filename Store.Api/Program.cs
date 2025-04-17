@@ -27,7 +27,8 @@ public class Program
         builder.Services.AddScoped<IDbInitializer, DbInitializer>();
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
         builder.Services.AddScoped<IServiceManager, ServiceManager>();
-        builder.Services.AddAutoMapper(m => m.AddProfile(new ProductProfile()));
+        builder.Services.AddAutoMapper(typeof(ServiceManager).Assembly);
+        //builder.Services.AddTransient<PictureUrlResolver>();
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();

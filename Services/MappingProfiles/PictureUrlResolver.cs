@@ -1,10 +1,11 @@
 ﻿using AutoMapper;
 using Domain.Entities;
+using Microsoft.Extensions.Configuration;
 using Shared.Dto.Product;
 
 namespace Services.MappingProfiles;
 
-public class PictureUrlResolver : IValueResolver<Product, ProductResultDto, string?>
+public class PictureUrlResolver(IConfiguration config) : IValueResolver<Product, ProductResultDto, string?>
 {
     public string Resolve(Product source, ProductResultDto destination, string? destMember, ResolutionContext context)
     {
@@ -13,6 +14,6 @@ public class PictureUrlResolver : IValueResolver<Product, ProductResultDto, stri
             return string.Empty;
         }
 
-        return $"https://localhost:7050/{source.PictureUrl}";
+        return $"{config["BaseUrl"]}{source.PictureUrl}";
     }
 }
