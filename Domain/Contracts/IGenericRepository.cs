@@ -6,7 +6,11 @@ public interface IGenericRepository<TEntity, TKey> where TEntity : BaseEntity<TK
 {
     Task<TEntity?> GetAsync(TKey id);
 
+    Task<TEntity?> GetAsync(Specification<TEntity> specification);
+
     Task<IEnumerable<TEntity>> GetAllAsync(bool tracked = false);
+
+    Task<IEnumerable<TEntity>> GetAllAsync(Specification<TEntity> specification);
 
     Task AddAsync(TEntity entity);
 
