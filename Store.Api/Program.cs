@@ -1,4 +1,5 @@
 using System.Reflection.Metadata;
+using System.Text.Json.Serialization;
 using Domain.Contracts;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
@@ -18,7 +19,9 @@ public class Program
 
         // Add services to the container.
 
-        builder.Services.AddControllers();
+        builder.Services.AddControllers()
+            .AddJsonOptions(opt =>
+                opt.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
         builder.Services.AddDbContext<StoreDbContext>(options =>
         {

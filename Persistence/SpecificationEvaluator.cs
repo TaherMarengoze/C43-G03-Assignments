@@ -18,6 +18,15 @@ public static class SpecificationEvaluator
         query = specifications.Includes.Aggregate(query,
             (currentQry, includeExpr) => currentQry.Include(includeExpr));
 
+        if (specifications.OrderBy is not null)
+        {
+            query = query.OrderBy(specifications.OrderBy);
+        }
+        else if (specifications.OrderByDesc is not null)
+        {
+            query = query.OrderByDescending(specifications.OrderByDesc);
+        }
+
         return query;
     }
 }
