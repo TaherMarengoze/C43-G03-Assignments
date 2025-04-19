@@ -7,9 +7,11 @@ namespace Presentation.Controllers;
 public class ProductController(IServiceManager serviceManager) : ApiController
 {
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<ProductResultDto>>> GetAllProducts()
+    public async Task<ActionResult<IEnumerable<ProductResultDto>>> GetAllProducts(
+        [FromQuery] ProductSpecificationParams specsParams)
     {
-        var products = await serviceManager.ProductService.GetAllProductsAsync();
+        var products = await serviceManager.ProductService
+            .GetAllProductsAsync(specsParams);
 
         return Ok(products);
     }
@@ -17,7 +19,8 @@ public class ProductController(IServiceManager serviceManager) : ApiController
     [HttpGet]
     public async Task<ActionResult<ProductResultDto>> GetProduct(int id)
     {
-        var product = await serviceManager.ProductService.GetProductByIdAsync(id);
+        var product = await serviceManager.ProductService
+            .GetProductByIdAsync(id);
 
         return Ok(product);
     }
@@ -25,7 +28,8 @@ public class ProductController(IServiceManager serviceManager) : ApiController
     [HttpGet]
     public async Task<ActionResult<IEnumerable<BrandResultDto>>> GetAllBrands()
     {
-        var brands = await serviceManager.ProductService.GetAllBrandsAsync();
+        var brands = await serviceManager.ProductService
+            .GetAllBrandsAsync();
 
         return Ok(brands);
     }
@@ -33,7 +37,8 @@ public class ProductController(IServiceManager serviceManager) : ApiController
     [HttpGet]
     public async Task<ActionResult<IEnumerable<TypeResultDto>>> GetAllTypes()
     {
-        var types = await serviceManager.ProductService.GetAllTypesAsync();
+        var types = await serviceManager.ProductService
+            .GetAllTypesAsync();
 
         return Ok(types);
     }
