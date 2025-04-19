@@ -21,5 +21,7 @@ public class ProductWithFilterSpecification : Specification<Product>
         => true
         && (!specs.BrandId.HasValue || p.BrandId == specs.BrandId)
         && (!specs.TypeId.HasValue || p.TypeId == specs.TypeId)
+        && (!string.IsNullOrWhiteSpace(specs.Search) ||
+            p.Name.Contains(specs.Search!.ToLower().Trim(), StringComparison.CurrentCultureIgnoreCase))
         ;
 }
