@@ -12,6 +12,8 @@ public interface IGenericRepository<TEntity, TKey> where TEntity : BaseEntity<TK
 
     Task<IEnumerable<TEntity>> GetAllAsync(Specification<TEntity> specification);
 
+    Task<int> CountAsync(Specification<TEntity> specification);
+
     Task AddAsync(TEntity entity);
 
     void Update(TEntity entity);

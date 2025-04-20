@@ -3,13 +3,14 @@ using Domain.Contracts;
 using Domain.Entities;
 using Services.Abstraction;
 using Services.Specifications;
+using Shared;
 using Shared.Dto.Product;
 
 namespace Services;
 
 public class ProductService(IUnitOfWork unitOfWork, IMapper mapper) : IProductService
 {
-    public async Task<IEnumerable<ProductResultDto>> GetAllProductsAsync(ProductSpecificationParams specsParams)
+    public async Task<PaginatedResult<ProductResultDto>> GetAllProductsAsync(ProductSpecificationParams specsParams)
     {
         var specs =
             new ProductWithFilterSpecification(specsParams);
@@ -20,7 +21,17 @@ public class ProductService(IUnitOfWork unitOfWork, IMapper mapper) : IProductSe
         var mappedProducts = mapper
             .Map<IEnumerable<ProductResultDto>>(products);
 
-        return mappedProducts;
+        var countSpecs = new ProductCountSpecification(specsParams);
+        var productsWithSpecsCount = await unitOfWork
+            .GetRepository<Product, int>().CountAsync(countSpecs);
+
+        var paginatedProducts =
+            new PaginatedResult<ProductResultDto>(specsParams.PageIndex,
+            specsParams.PageSize,
+            productsWithSpecsCount,
+            mappedProducts);
+
+        return paginatedProducts;
     }
 
     public async Task<ProductResultDto> GetProductByIdAsync(int id)

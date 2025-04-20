@@ -16,7 +16,7 @@ public class GenericRepository<TEntity, TKey>(StoreDbContext context)
     
     public async Task<TEntity?> GetAsync(Specification<TEntity> specification)
     {
-        return await GetBaseQuey(specification).FirstOrDefaultAsync();
+        return await ApplySpecification(specification).FirstOrDefaultAsync();
     }
 
     public async Task<IEnumerable<TEntity>> GetAllAsync(bool tracked = false)
@@ -31,7 +31,12 @@ public class GenericRepository<TEntity, TKey>(StoreDbContext context)
 
     public async Task<IEnumerable<TEntity>> GetAllAsync(Specification<TEntity> specification)
     {
-        return await GetBaseQuey(specification).ToListAsync();
+        return await ApplySpecification(specification).ToListAsync();
+    }
+
+    public async Task<int> CountAsync(Specification<TEntity> specification)
+    {
+        return await ApplySpecification(specification).CountAsync();
     }
 
     public async Task AddAsync(TEntity entity)
@@ -49,7 +54,7 @@ public class GenericRepository<TEntity, TKey>(StoreDbContext context)
         context.Set<TEntity>().Remove(entity);
     }
 
-    private IQueryable<TEntity> GetBaseQuey(Specification<TEntity> specification)
+    private IQueryable<TEntity> ApplySpecification(Specification<TEntity> specification)
     {
         return SpecificationEvaluator.GetQuery(context.Set<TEntity>(), specification);
     }

@@ -27,6 +27,11 @@ public static class SpecificationEvaluator
             query = query.OrderByDescending(specifications.OrderByDesc);
         }
 
+        if (specifications.IsPaginated)
+        {
+            query = query.Skip(specifications.Skip).Take(specifications.Take);
+        }
+
         return query;
     }
 }

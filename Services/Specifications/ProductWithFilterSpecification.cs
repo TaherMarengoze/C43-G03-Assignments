@@ -8,14 +8,21 @@ public class ProductWithFilterSpecification : Specification<Product>
 {
     //Many Products
     public ProductWithFilterSpecification(ProductSpecificationParams specs)
-        : base(p => ExpressionBuilder(specs, p))
+        : base(ExpressionBuilders.ForProductSpecificationParams(specs))
     {
         AddInclude(p => p.ProductBrand!);
         AddInclude(p => p.ProductType!);
 
-        if (specs.Sort is not null)
+        ApplyPagination(specs.PageIndex, specs.PageSize);
+
+        ApplySortingOptions(specs.Sort);
+    }
+
+    private void ApplySortingOptions(SortOptions? sortOptions)
+    {
+        if (sortOptions is not null)
         {
-            switch (specs.Sort)
+            switch (sortOptions)
             {
                 case SortOptions.NameAsc:
                 SetOrderBy(p => p.Name);
@@ -39,19 +46,11 @@ public class ProductWithFilterSpecification : Specification<Product>
             }
         }
     }
-
+    
     //One Product
     public ProductWithFilterSpecification(int id) : base(p => p.Id == id)
     {
         AddInclude(p => p.ProductBrand!);
         AddInclude(p => p.ProductType!);
     }
-
-    private static bool ExpressionBuilder(ProductSpecificationParams specs, Product p)
-        => true
-        && (!specs.BrandId.HasValue || p.BrandId == specs.BrandId)
-        && (!specs.TypeId.HasValue || p.TypeId == specs.TypeId)
-        && (!string.IsNullOrWhiteSpace(specs.Search) ||
-            p.Name.Contains(specs.Search!.ToLower().Trim(), StringComparison.CurrentCultureIgnoreCase))
-        ;
 }
