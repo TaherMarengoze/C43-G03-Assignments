@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using Domain.Exceptions;
 using Shared.ErrorModels;
 
 namespace Store.Api.Middlewares;
@@ -23,19 +24,18 @@ public class GlobalErrorHandlingMiddleware(
 
     private async Task HandleException(HttpContext httpContext, Exception ex)
     {
-        httpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-
         httpContext.Response.ContentType = "application/json";
-
-        var response = new ErrorDetails
+        httpContext.Response.StatusCode = ex switch
         {
-            StatusCode = 100,
-            ErrorMessage = ex.Message,
+            NotFoundException => (int)HttpStatusCode.NotFound,
+            _ => (int)HttpStatusCode.InternalServerError
         };
 
-        //TODO:
-
-        response.StatusCode = httpContext.Response.StatusCode;
+        ErrorDetails response = new()
+        {
+            StatusCode = httpContext.Response.StatusCode,
+            ErrorMessage = ex.Message,
+        };
 
         await httpContext.Response.WriteAsync($"{response}");
     }

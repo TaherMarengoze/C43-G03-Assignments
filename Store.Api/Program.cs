@@ -8,6 +8,7 @@ using Persistence.Repositories;
 using Services;
 using Services.Abstraction;
 using Services.MappingProfiles;
+using Store.Api.Middlewares;
 
 namespace Store.Api;
 
@@ -41,6 +42,8 @@ public class Program
         var app = builder.Build();
 
         await RunDbInitializerAsync(app);
+
+        app.UseMiddleware<GlobalErrorHandlingMiddleware>();
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
