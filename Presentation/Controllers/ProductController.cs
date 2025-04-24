@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Net;
+using Microsoft.AspNetCore.Mvc;
 using Services.Abstraction;
 using Shared.Dto.Product;
 
@@ -17,6 +18,7 @@ public class ProductController(IServiceManager serviceManager) : ApiController
     }
 
     [HttpGet]
+    [ProducesResponseType(typeof(ProductResultDto), (int)HttpStatusCode.OK)]
     public async Task<ActionResult<ProductResultDto>> GetProduct(int id)
     {
         var product = await serviceManager.ProductService

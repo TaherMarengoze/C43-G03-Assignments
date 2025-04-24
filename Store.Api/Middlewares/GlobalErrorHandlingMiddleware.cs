@@ -13,30 +13,57 @@ public class GlobalErrorHandlingMiddleware(
         try
         {
             await next(httpContext);
+
+            if (httpContext.Response.StatusCode == (int)HttpStatusCode.NotFound)
+            {
+                await HandleNotFoundEndpointAsync(httpContext);
+            }
         }
         catch (Exception ex)
         {
             logger.LogError($"Oops, bad thing happened: {ex}");
 
-            await HandleException(httpContext, ex);
+            await HandleExceptionAsync(httpContext, ex);
         }
     }
 
-    private async Task HandleException(HttpContext httpContext, Exception ex)
+    private async Task HandleNotFoundEndpointAsync(HttpContext httpContext)
     {
+        ErrorDetails response = new()
+        {
+            ErrorMessage = $"Endpoint: '{httpContext.Request.Path}', Not Found!",
+            StatusCode = (int)HttpStatusCode.NotFound,
+        };
+
+        httpContext.Response.ContentType = "application/json";
+        
+        await httpContext.Response.WriteAsync($"{response}");
+    }
+
+    private async Task HandleExceptionAsync(HttpContext httpContext, Exception ex)
+    {
+        ErrorDetails response = new()
+        {
+            ErrorMessage = ex.Message,
+            //StatusCode = httpContext.Response.StatusCode,
+        };
+
         httpContext.Response.ContentType = "application/json";
         httpContext.Response.StatusCode = ex switch
         {
             NotFoundException => (int)HttpStatusCode.NotFound,
+            ValidationException validationEx => HandleValidationException(validationEx, response),
             _ => (int)HttpStatusCode.InternalServerError
         };
 
-        ErrorDetails response = new()
-        {
-            StatusCode = httpContext.Response.StatusCode,
-            ErrorMessage = ex.Message,
-        };
+        response.StatusCode = httpContext.Response.StatusCode;
 
         await httpContext.Response.WriteAsync($"{response}");
+    }
+
+    private int HandleValidationException(ValidationException ex, ErrorDetails errorDetails)
+    {
+        errorDetails.Errors = ex.Errors;
+        return (int)HttpStatusCode.BadRequest;
     }
 }

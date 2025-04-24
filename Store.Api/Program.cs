@@ -1,6 +1,7 @@
 using System.Reflection.Metadata;
 using System.Text.Json.Serialization;
 using Domain.Contracts;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 using Persistence.Data;
@@ -8,6 +9,7 @@ using Persistence.Repositories;
 using Services;
 using Services.Abstraction;
 using Services.MappingProfiles;
+using Store.Api.Factories;
 using Store.Api.Middlewares;
 
 namespace Store.Api;
@@ -33,7 +35,12 @@ public class Program
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
         builder.Services.AddScoped<IServiceManager, ServiceManager>();
         builder.Services.AddAutoMapper(typeof(ServiceManager).Assembly);
-        //builder.Services.AddTransient<PictureUrlResolver>();
+
+        builder.Services.Configure<ApiBehaviorOptions>(options =>
+        {
+            options.InvalidModelStateResponseFactory =
+                ApiResponseFactory.CustomValidationErrorResponse;
+        });
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
