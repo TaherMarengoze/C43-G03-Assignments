@@ -1,4 +1,3 @@
-using System.Reflection.Metadata;
 using System.Text.Json.Serialization;
 using Domain.Contracts;
 using Microsoft.AspNetCore.Mvc;
@@ -8,7 +7,7 @@ using Persistence.Data;
 using Persistence.Repositories;
 using Services;
 using Services.Abstraction;
-using Services.MappingProfiles;
+using StackExchange.Redis;
 using Store.Api.Factories;
 using Store.Api.Middlewares;
 
@@ -30,6 +29,11 @@ public class Program
         {
             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultSqlConn"));
         });
+
+        builder.Services.AddSingleton<IConnectionMultiplexer>(
+            _ => ConnectionMultiplexer.Connect(
+                builder.Configuration.GetConnectionString("Redis")!)
+        );
 
         builder.Services.AddScoped<IDbInitializer, DbInitializer>();
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
