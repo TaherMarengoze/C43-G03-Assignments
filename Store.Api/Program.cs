@@ -37,6 +37,7 @@ public class Program
 
         builder.Services.AddScoped<IDbInitializer, DbInitializer>();
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+        builder.Services.AddScoped<IBasketRepository, BasketRepository>();
         builder.Services.AddScoped<IServiceManager, ServiceManager>();
         builder.Services.AddAutoMapper(typeof(ServiceManager).Assembly);
 
