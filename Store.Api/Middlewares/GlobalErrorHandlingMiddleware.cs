@@ -1,4 +1,7 @@
-﻿using System.Net;
+﻿#pragma warning disable IDE0079 // Remove unnecessary suppression
+#pragma warning disable CA2254 // Template should be a static expression
+
+using System.Net;
 using Domain.Exceptions;
 using Shared.ErrorModels;
 
@@ -27,7 +30,7 @@ public class GlobalErrorHandlingMiddleware(
         }
     }
 
-    private async Task HandleNotFoundEndpointAsync(HttpContext httpContext)
+    private static async Task HandleNotFoundEndpointAsync(HttpContext httpContext)
     {
         ErrorDetails response = new()
         {
@@ -40,7 +43,7 @@ public class GlobalErrorHandlingMiddleware(
         await httpContext.Response.WriteAsync($"{response}");
     }
 
-    private async Task HandleExceptionAsync(HttpContext httpContext, Exception ex)
+    private static async Task HandleExceptionAsync(HttpContext httpContext, Exception ex)
     {
         ErrorDetails response = new()
         {
@@ -52,6 +55,7 @@ public class GlobalErrorHandlingMiddleware(
         httpContext.Response.StatusCode = ex switch
         {
             NotFoundException => (int)HttpStatusCode.NotFound,
+            UnauthorizedException => (int)HttpStatusCode.Unauthorized,
             ValidationException validationEx => HandleValidationException(validationEx, response),
             _ => (int)HttpStatusCode.InternalServerError
         };
@@ -61,7 +65,7 @@ public class GlobalErrorHandlingMiddleware(
         await httpContext.Response.WriteAsync($"{response}");
     }
 
-    private int HandleValidationException(ValidationException ex, ErrorDetails errorDetails)
+    private static int HandleValidationException(ValidationException ex, ErrorDetails errorDetails)
     {
         errorDetails.Errors = ex.Errors;
         return (int)HttpStatusCode.BadRequest;
