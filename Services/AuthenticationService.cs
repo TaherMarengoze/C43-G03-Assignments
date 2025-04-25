@@ -26,8 +26,26 @@ public class AuthenticationService(UserManager<User> userManager,
         return new UserResultDto(user.DisplayName, user.Email!, "jwtToken");
     }
 
-    public Task<UserResultDto> RegisterAsync(RegisterDto registerDto)
+    public async Task<UserResultDto> RegisterAsync(RegisterDto registerDto)
     {
-        throw new NotImplementedException();
+        var user = new User
+        {
+            UserName = registerDto.UserName,
+            Email = registerDto.Email,
+            DisplayName = registerDto.DisplayName,
+            PhoneNumber = registerDto.PhoneNumber,
+        };
+
+        var result = await userManager.CreateAsync(user, registerDto.Password);
+
+        if (!result.Succeeded)
+        {
+            var errors = result.Errors
+                .Select(err => err.Description).ToList();
+
+            throw new ValidationException(errors);
+        }
+
+        return new UserResultDto(user.DisplayName, user.Email!, "jwtToken");
     }
 }
