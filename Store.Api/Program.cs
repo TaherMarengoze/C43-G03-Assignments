@@ -1,9 +1,12 @@
 using System.Text.Json.Serialization;
 using Domain.Contracts;
+using Domain.Entities.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 using Persistence.Data;
+using Persistence.Identity;
 using Persistence.Repositories;
 using Services;
 using Services.Abstraction;
@@ -29,6 +32,20 @@ public class Program
         {
             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultSqlConn"));
         });
+
+        builder.Services.AddDbContext<StoreIdentityDbContext>(options =>
+            options.UseSqlServer(builder.Configuration.GetConnectionString("IdentitySqlConn")));
+
+        builder.Services.AddIdentity<User, IdentityRole>(options =>
+        {
+            options.Password.RequiredLength = 6;
+            options.Password.RequireUppercase = false;
+            options.Password.RequireLowercase = false;
+            options.Password.RequireDigit = true;
+            options.Password.RequireNonAlphanumeric = false;
+
+            options.User.RequireUniqueEmail = true;
+        }).AddEntityFrameworkStores<StoreIdentityDbContext>();
 
         builder.Services.AddSingleton<IConnectionMultiplexer>(
             _ => ConnectionMultiplexer.Connect(
@@ -67,6 +84,8 @@ public class Program
         app.UseStaticFiles();
 
         app.UseHttpsRedirection();
+
+        app.UseAuthentication();
 
         app.UseAuthorization();
 
