@@ -1,16 +1,23 @@
 ﻿using System.Text.Json;
 using Domain.Contracts;
 using Domain.Entities;
+using Domain.Entities.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Persistence.Data;
+using Persistence.Identity;
 
 namespace Persistence;
 
-public class DbInitializer(StoreDbContext context) : IDbInitializer
+public class DbInitializer(StoreDbContext context,
+                           StoreIdentityDbContext identityDbContext,
+                           RoleManager<IdentityRole> roleManager,
+                           UserManager<User> userManager)
+    : IDbInitializer
 {
     public async Task InitializeAsync()
     {
-        //CheckForPendingMigrations();
+        await CheckForPendingMigrationsAsync(context);
 
         try
         {
@@ -25,47 +32,47 @@ public class DbInitializer(StoreDbContext context) : IDbInitializer
         
     }
 
-    private void SeedProductTypes()
+    public async Task InitializeIdentityAsync()
     {
-        if (!context.ProductTypes.Any())
+        await CheckForPendingMigrationsAsync(identityDbContext);
+
+        if (!roleManager.Roles.Any())
         {
-            var typesDataSource = File.ReadAllText(
-                @"../Infrastructure/Persistence/Data/Seeding/types.json");
+            await roleManager.CreateAsync(new IdentityRole("Admin"));
+            await roleManager.CreateAsync(new IdentityRole("SuperAdmin"));
+        }
 
-            var types =
-                JsonSerializer.Deserialize<List<ProductType>>(typesDataSource);
-
-            if (types != null && types.Count != 0)
+        if (!userManager.Users.Any())
+        {
+            var superAdminUser = new User
             {
-                context.ProductTypes.AddRange(types);
-                context.SaveChanges();
-            }
+                DisplayName = "Super Admin",
+                Email = "superadmin@gmail.com",
+                UserName = "SuperAdmin",
+                PhoneNumber = "1234567890"
+            };
+
+            var adminUser = new User
+            {
+                DisplayName = "Admin",
+                Email = "admin@gmail.com",
+                UserName = "Admin",
+                PhoneNumber = "0987654321"
+            };
+
+            await userManager.CreateAsync(superAdminUser, "Passw0rd");
+            await userManager.CreateAsync(adminUser, "Passw0rd");
+
+            await userManager.AddToRoleAsync(superAdminUser, "SuperAdmin");
+            await userManager.AddToRoleAsync(adminUser, "Admin");
         }
     }
 
-    private void SeedProductBrands()
+    private static async Task CheckForPendingMigrationsAsync(DbContext dbContext)
     {
-        if (!context.ProductBrands.Any())
+        if (dbContext.Database.GetPendingMigrations().Any())
         {
-            var brandsDataSource = File.ReadAllText(
-                @"../Infrastructure/Persistence/Data/Seeding/brands.json");
-
-            var brands =
-                JsonSerializer.Deserialize<List<ProductBrand>>(brandsDataSource);
-
-            if (brands != null && brands.Count != 0)
-            {
-                context.ProductBrands.AddRange(brands);
-                context.SaveChanges();
-            }
-        }
-    }
-
-    private void CheckForPendingMigrations()
-    {
-        if (context.Database.GetPendingMigrations().Any())
-        {
-            context.Database.Migrate();
+            await dbContext.Database.MigrateAsync();
         }
     }
 

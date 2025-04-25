@@ -102,5 +102,6 @@ public class Program
             .GetRequiredService<IDbInitializer>();
 
         await dbInitializer.InitializeAsync();
+        await dbInitializer.InitializeIdentityAsync();
     }
 }
