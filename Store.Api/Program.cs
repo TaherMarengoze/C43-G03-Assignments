@@ -1,17 +1,4 @@
-using System.Text.Json.Serialization;
-using Domain.Contracts;
-using Domain.Entities.Identity;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Persistence;
-using Persistence.Data;
-using Persistence.Identity;
-using Persistence.Repositories;
-using Services;
-using Services.Abstraction;
-using StackExchange.Redis;
-using Store.Api.Factories;
+using Store.Api.Extensions;
 using Store.Api.Middlewares;
 
 namespace Store.Api;
@@ -23,54 +10,13 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
 
         // Add services to the container.
-
-        builder.Services.AddControllers()
-            .AddJsonOptions(opt =>
-                opt.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
-
-        builder.Services.AddDbContext<StoreDbContext>(options =>
-        {
-            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultSqlConn"));
-        });
-
-        builder.Services.AddDbContext<StoreIdentityDbContext>(options =>
-            options.UseSqlServer(builder.Configuration.GetConnectionString("IdentitySqlConn")));
-
-        builder.Services.AddIdentity<User, IdentityRole>(options =>
-        {
-            options.Password.RequiredLength = 6;
-            options.Password.RequireUppercase = false;
-            options.Password.RequireLowercase = false;
-            options.Password.RequireDigit = true;
-            options.Password.RequireNonAlphanumeric = false;
-
-            options.User.RequireUniqueEmail = true;
-        }).AddEntityFrameworkStores<StoreIdentityDbContext>();
-
-        builder.Services.AddSingleton<IConnectionMultiplexer>(
-            _ => ConnectionMultiplexer.Connect(
-                builder.Configuration.GetConnectionString("Redis")!)
-        );
-
-        builder.Services.AddScoped<IDbInitializer, DbInitializer>();
-        builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-        builder.Services.AddScoped<IBasketRepository, BasketRepository>();
-        builder.Services.AddScoped<IServiceManager, ServiceManager>();
-        builder.Services.AddAutoMapper(typeof(ServiceManager).Assembly);
-
-        builder.Services.Configure<ApiBehaviorOptions>(options =>
-        {
-            options.InvalidModelStateResponseFactory =
-                ApiResponseFactory.CustomValidationErrorResponse;
-        });
-
-        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-        builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
+        builder.Services.InfrastructureServices(builder.Configuration);
+        builder.Services.AddCoreServices(builder.Configuration);
+        builder.Services.AddPresentationServices();
 
         var app = builder.Build();
 
-        await RunDbInitializerAsync(app);
+        await app.RunDbInitializerAsync();
 
         app.UseMiddleware<GlobalErrorHandlingMiddleware>();
 
@@ -82,26 +28,11 @@ public class Program
         }
 
         app.UseStaticFiles();
-
         app.UseHttpsRedirection();
-
         app.UseAuthentication();
-
         app.UseAuthorization();
-
-
         app.MapControllers();
 
         app.Run();
-    }
-
-    static async Task RunDbInitializerAsync(WebApplication app)
-    {
-        using var scoope = app.Services.CreateScope();
-        var dbInitializer = scoope.ServiceProvider
-            .GetRequiredService<IDbInitializer>();
-
-        await dbInitializer.InitializeAsync();
-        await dbInitializer.InitializeIdentityAsync();
     }
 }

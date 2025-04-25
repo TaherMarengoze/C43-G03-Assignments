@@ -1,14 +1,20 @@
-﻿using AutoMapper;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using AutoMapper;
 using Domain.Entities.Identity;
 using Domain.Exceptions;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Services.Abstraction;
 using Shared.Dto.Identity;
 
 namespace Services;
 
 public class AuthenticationService(UserManager<User> userManager,
-                                   IMapper mapper)
+                                   IMapper mapper,
+                                   IOptions<JwtOptions> options)
     : IAuthenticationService
 {
     public async Task<UserResultDto> LoginAsync(LoginDto loginDto)
@@ -23,7 +29,8 @@ public class AuthenticationService(UserManager<User> userManager,
             throw new UnauthorizedException($"Incorrect password!");
         }
 
-        return new UserResultDto(user.DisplayName, user.Email!, "jwtToken");
+        return new UserResultDto(user.DisplayName, user.Email!,
+            await CreateTokenAsync(user));
     }
 
     public async Task<UserResultDto> RegisterAsync(RegisterDto registerDto)
@@ -46,6 +53,43 @@ public class AuthenticationService(UserManager<User> userManager,
             throw new ValidationException(errors);
         }
 
-        return new UserResultDto(user.DisplayName, user.Email!, "jwtToken");
+        return new UserResultDto(user.DisplayName, user.Email!,
+            await CreateTokenAsync(user));
+    }
+
+    private async Task<string> CreateTokenAsync(User user)
+    {
+        var jwtOptions = options.Value;
+
+        var claims = new List<Claim>
+        {
+            new(ClaimTypes.Name, user.UserName),
+            new(ClaimTypes.Email, user.Email),
+        };
+
+        var roles = await userManager.GetRolesAsync(user);
+
+        foreach (var role in roles)
+        {
+            claims.Add(new Claim(ClaimTypes.Role , role));
+        }
+
+        var key =
+            new SymmetricSecurityKey(Encoding.UTF8.GetBytes("jwt-key-c43-g03"));
+
+        var creds =
+            new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+        var token =
+            new JwtSecurityToken(
+                claims: claims,
+                signingCredentials: creds,
+                expires: DateTime.UtcNow.AddDays(jwtOptions.DurationInDays),
+
+                audience: jwtOptions.Audiance,
+                issuer: jwtOptions.Issuer
+            );
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
     }
 }
