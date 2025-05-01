@@ -2,6 +2,7 @@
 using Domain.Contracts;
 using Domain.Entities;
 using Domain.Entities.Identity;
+using Domain.Entities.Order;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Persistence.Data;
@@ -24,6 +25,7 @@ public class DbInitializer(StoreDbContext context,
             await SeedEntityAsync<ProductType>("types.json");
             await SeedEntityAsync<ProductBrand>("brands.json");
             await SeedEntityAsync<Product>("products.json");
+            await SeedEntityAsync<DeliveryMethod>("delivery.json");
         }
         catch (Exception)
         {
