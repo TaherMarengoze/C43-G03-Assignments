@@ -12,6 +12,4 @@ public record AddressDto
     public string City { get; set; }
 
     public string Country { get; set; }
-
-    public string UserId { get; set; }
 }
