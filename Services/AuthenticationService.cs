@@ -75,7 +75,7 @@ public class AuthenticationService(UserManager<User> userManager,
         }
 
         var key =
-            new SymmetricSecurityKey(Encoding.UTF8.GetBytes("jwt-key-c43-g03"));
+            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecurityKey));
 
         var creds =
             new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
