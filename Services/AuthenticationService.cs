@@ -1,10 +1,12 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using AutoMapper;
 using Domain.Entities.Identity;
 using Domain.Exceptions;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Services.Abstraction;
@@ -12,6 +14,7 @@ using Shared.Dto.Identity;
 
 namespace Services;
 
+[SuppressMessage("Style", "IDE0270:Use coalesce expression", Justification = "<Pending>")]
 public class AuthenticationService(UserManager<User> userManager,
                                    IMapper mapper,
                                    IOptions<JwtOptions> options)
@@ -58,6 +61,63 @@ public class AuthenticationService(UserManager<User> userManager,
 
         return new UserResultDto(user.DisplayName, user.Email!,
             await CreateTokenAsync(user));
+    }
+
+    public async Task<UserResultDto> GetUserByEmailAsync(string email)
+    {
+        var user = await userManager.FindByEmailAsync(email);
+
+        if (user == null)
+        {
+            throw new UserNotFoundException(email);
+        }
+
+        return new UserResultDto
+        (
+            DisplayName: user.DisplayName,
+            Email: user.Email!,
+            Token: await CreateTokenAsync(user)
+        );
+    }
+
+    public async Task<bool> IsEmailExistAsync(string email)
+    {
+        var user = await userManager.FindByEmailAsync(email);
+
+        return user != null;
+    }
+
+    public async Task<AddressDto> GetUserAddressAsync(string email)
+    {
+        var user = await userManager.Users
+            .Include(u => u.Address)
+            .FirstOrDefaultAsync(u => u.Email == email);
+
+        if (user == null)
+        {
+            throw new UserNotFoundException(email);
+        }
+
+        return mapper.Map<AddressDto>(user.Address);
+    }
+
+    public async Task<AddressDto> UpdateUserAddressAsync(string email, AddressDto addressDto)
+    {
+        var user = await userManager.Users
+            .Include(u => u.Address)
+            .FirstOrDefaultAsync(u => u.Email == email);
+
+        if (user == null)
+        {
+            throw new UserNotFoundException(email);
+        }
+
+        var mappedAddress = mapper.Map<Address>(addressDto);
+        user.Address = mappedAddress;
+
+        await userManager.UpdateAsync(user);
+
+        return addressDto;
     }
 
     private async Task<string> CreateTokenAsync(User user)
