@@ -29,8 +29,11 @@ public class AuthenticationService(UserManager<User> userManager,
             throw new UnauthorizedException($"Incorrect password!");
         }
 
-        return new UserResultDto(user.DisplayName, user.Email!,
-            await CreateTokenAsync(user));
+        return new UserResultDto(
+            user.DisplayName,
+            user.Email!,
+            await CreateTokenAsync(user)
+        );
     }
 
     public async Task<UserResultDto> RegisterAsync(RegisterDto registerDto)
